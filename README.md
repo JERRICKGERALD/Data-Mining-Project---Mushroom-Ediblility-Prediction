@@ -1,4 +1,4 @@
-# Data-Mining-Project---Mushroom-Ediblility-Prediction
+# Data-Mining-Project-- Mushroom-Ediblility-Prediction
 
 Mushrooms are fungi, part of a kingdom of their own separate from plants and animals. As you might imagine, they present numerous features to assess before deciding whether one is edible or not.
 
