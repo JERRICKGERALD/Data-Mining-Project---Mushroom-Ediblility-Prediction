@@ -449,20 +449,7 @@ df.info()
 print(df.head())
 
 #%%
-# change data type
 
-
-df["class"]=df["class"].astype('category')
-df["ring-type"]=df["ring-type"].astype('category')
-df["cap-shape"]=df["cap-shape"].astype('category')
-df["cap-color"]= df["cap-color"].astype('category')
-df["does-bruise-or-bleed"]= df["does-bruise-or-bleed"].astype('category')
-df["gill-attachment"]= df["gill-attachment"].astype('category')
-df["gill-color"]= df["gill-color"].astype('category')
-df["stem-color"]= df["stem-color"].astype('category')
-df["has-ring"]= df["has-ring"].astype('category')
-df["habitat"]= df["habitat"].astype('category')
-df["season"]= df["season"].astype('category')
 
 #%%
 df.info()
