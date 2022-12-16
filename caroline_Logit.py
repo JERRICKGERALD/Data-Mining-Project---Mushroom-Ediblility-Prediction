@@ -24,7 +24,7 @@ print(df.head())
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 yf = df[['class']]
-xf = df[['ring-type', 'stem-width', 'cap-shape', 'gill-color', 'stem-height', 'stem-color', 'gill-attachment']]
+xf = df[['season' , 'habitat', 'does-bruise-or-bleed' ,'cap-color' ,'cap-diameter','ring-type', 'stem-width', 'cap-shape', 'gill-color', 'stem-height', 'stem-color', 'gill-attachment']]
 
 xftrain, xftest, yftrain, yftest = train_test_split(xf, yf, test_size=0.30, random_state=123)
 fullLogit = LogisticRegression() #initiate logit model
