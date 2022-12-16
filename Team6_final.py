@@ -23,6 +23,9 @@ data.head()
 data['class'].value_counts()
 
 #%%
+data.info()
+
+#%%
 missing_values_count = data.isnull().sum()
 missing_values_count
 
@@ -160,6 +163,11 @@ table2['total'] = table2.sum(axis=1)
 table2['% e'] = (table2['e'] / table2.total * 100).round(2)
 table2['% p'] = (table2['p'] / table2.total * 100).round(2)
 table2.sort_values('total', ascending=False)
+
+#%%
+# Stem Width Distribution
+sns.histplot(df, x="stem-width", hue="class", multiple="stack", palette="husl", bins=20).set(title="Stem Width Distribution")
+plt.show()
 
 #%%
 # Stem Width Box-Plot
@@ -651,7 +659,6 @@ plt.plot(fpr,tpr,label="Gradient Boosting, AUC="+str(auc))
 plt.legend()
 
 #%% [markdown]
-# ## Models
 # ### SVM
 
 #%%
@@ -676,7 +683,8 @@ df.info()
 
 #%%
 # Define predictors and target variables
-X = df.drop(['Unnamed: 0', 'class'], axis=1) #all predictors
+# X = df.drop(['Unnamed: 0', 'class'], axis=1) #all predictors
+X = df.drop(['Unnamed: 0', 'class', 'has-ring'], axis=1) # exclude has-ring
 y = df["class"]
 
 # Numerical predictors
@@ -689,6 +697,8 @@ catlist = X.columns.drop(numlist).to_list()
 # Split and Preprocessing
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3 ,random_state=123)
 
+#%%
+# Standardization and binarization of target
 X_Preprocessor = ColumnTransformer(
     [
         ("numerical", StandardScaler(), numlist),
@@ -696,30 +706,32 @@ X_Preprocessor = ColumnTransformer(
     ],
     verbose_feature_names_out=False,
     sparse_threshold=0
-).fit(X_train)
+)
 
-#%%
-# Standardization and binarization of training set
 X_train_std = pd.DataFrame(X_Preprocessor.fit_transform(X_train), columns=X_Preprocessor.fit(X_train).get_feature_names_out())
 #X_train_std.head()
+X_test_std = pd.DataFrame(X_Preprocessor.transform(X_test), columns=X_Preprocessor.fit(X_test).get_feature_names_out())
+#X_test_std.head()
 
 y_Preprocessor = LabelBinarizer().fit(y_train)
 y_train_std = pd.DataFrame(y_Preprocessor.fit_transform(y_train), columns = ["class"])
 #y_train_std.head()
+y_test_std = pd.DataFrame(y_Preprocessor.transform(y_test), columns = ["class"])
+#y_test_std.head()
 
 #%%
 # SVM Model w/ linear kernel
 model1 = svm.SVC(kernel='linear')
 model1.fit(X_train_std, np.ravel(y_train_std))
 
-print(f'svc train score:  {model1.score(X_train_std,np.ravel(y_train_std))}') # 0.7862356133620286
+print(f'svc train score:  {model1.score(X_train_std,np.ravel(y_train_std))}') # 0.7803639936371293
 
 #%%
 # SVM Model w/ RBF kernel - Default parameters
 model2 = svm.SVC() # C=1, gamma='scale' = 0.08510638297872342
 model2.fit(X_train_std, np.ravel(y_train_std))
 
-print(f'svc train score:  {model2.score(X_train_std,np.ravel(y_train_std))}') # 0.9928183774679518
+print(f'svc train score:  {model2.score(X_train_std,np.ravel(y_train_std))}') # 0.99319266398428
 
 #%%
 # Hyperparameter grid search - Takes ~90 mins to run!!
@@ -749,19 +761,11 @@ bestsvm.fit(X_train_std, np.ravel(y_train_std))
 print(f'svc train score:  {bestsvm.score(X_train_std,np.ravel(y_train_std))}') #0.9988303546364742
 
 # Mean cross validated score
-scores = cross_val_score(bestsvm, X_train_std, np.ravel(y_train_std), cv=5)
-print(f'svc cv scores: {scores}')
-print(f'mean svc cv score: {scores.mean()}')
+# scores = cross_val_score(bestsvm, X_train_std, np.ravel(y_train_std), cv=5)
+# print(f'svc cv scores: {scores}')
+# print(f'mean svc cv score: {scores.mean()}')
 #svc cv scores: [0.99836257 0.99812865 0.99871345 0.99719265 0.99801146]
 #mean svc cv score: 0.9980817591606419
-
-#%%
-# Standardization of test set
-X_test_std = pd.DataFrame(X_Preprocessor.transform(X_test), columns=X_Preprocessor.fit(X_train).get_feature_names_out())
-X_test_std.head()
-
-y_test_std = pd.DataFrame(y_Preprocessor.transform(y_test), columns = ["class"])
-y_test_std.head()
 
 #%%
 # Model test set score
