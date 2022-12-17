@@ -354,7 +354,7 @@ print(df.head())
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 yf = df[['class']]
-xf = df[['ring-type', 'stem-width', 'cap-shape', 'gill-color', 'stem-height', 'stem-color', 'gill-attachment']]
+xf = df[['season' , 'habitat', 'does-bruise-or-bleed' ,'cap-color' ,'cap-diameter','ring-type', 'stem-width', 'cap-shape', 'gill-color', 'stem-height', 'stem-color', 'gill-attachment']]
 
 xftrain, xftest, yftrain, yftest = train_test_split(xf, yf, test_size=0.30, random_state=123)
 fullLogit = LogisticRegression() #initiate logit model
@@ -457,17 +457,105 @@ df.info()
 print(df.head())
 
 #%%
+#full model
+
+#define Xf:
+Xf = df[['season' , 'habitat', 'does-bruise-or-bleed' ,'cap-color' ,'cap-diameter','ring-type', 'stem-width', 'cap-shape', 'gill-color', 
+'stem-height', 'stem-color', 'gill-attachment']]
+
+#define yf:
+yf = df["class"]
 
 
+#%% 
+# one_hot_data
+one_hot_data=pd.get_dummies(Xf,drop_first=True)
+X_train, X_test, y_train, y_test = train_test_split(one_hot_data, yf, test_size=0.3 ,random_state=123)
+
 #%%
-df.info()
+# use a standard scale the features for processing
+scaler=StandardScaler()
+scale=scaler.fit(X_train)
+X_train=scale.transform(X_train)
+X_test=scale.transform(X_test)
+
 #%%
+# decision tree
+dtree = DecisionTreeClassifier( criterion='gini', splitter='best', max_depth=3)
+dtree = dtree.fit(X_train, y_train)
+#%%
+#  plot of decision tree
+
+tree.plot_tree(dtree)
+plt.show()
+
+#%%
+# make prediction
+
+y_pred=dtree.predict(X_test)
+
+y_pred
+
+#%%
+# find accuracy score
+score=accuracy_score(y_test, y_pred)
+score
+
+#%%
+#creating a confusion matrix
+confusion_matrix(y_test,y_pred)
+
+#%%
+#extracting TN, TP, FP, FN
+tn, fp, fn, tp=confusion_matrix(y_test,y_pred).ravel()
+(tn, fp, fn, tp)
+# %%
+# run classification report
+conf_matrix= classification_report(y_test,y_pred)
+print('Classification report; \n', conf_matrix)
+
+
+print(confusion_matrix(y_test, dtree.predict(X_test)))
+#%%
+
+# make Confusion Matrix
+y_pred = dtree.predict(X_test)
+conf_matrix = confusion_matrix(y_true=y_test, y_pred=y_pred)
+
+fig, ax = plt.subplots(figsize=(5, 5))
+ax.matshow(conf_matrix, cmap=plt.cm.Oranges, alpha=0.3)
+for i in range(conf_matrix.shape[0]):
+    for j in range(conf_matrix.shape[1]):
+        ax.text(x=j, y=i,s=conf_matrix[i, j], va='center', ha='center', size='xx-large')
+ 
+plt.xlabel('Predictions', fontsize=18)
+plt.ylabel('Actuals', fontsize=18)
+plt.title('Confusion Matrix', fontsize=18)
+plt.show()
+
+# %%
+import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score, roc_curve
+def plot_roc_curve(y_test, y_pred): 
+    fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+    plt.plot(fpr, tpr)
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate') 
+# %%
+#find AUC score
+
+from sklearn.metrics import RocCurveDisplay
+dtree_disp = RocCurveDisplay.from_estimator(dtree, X_test, y_test)
+plt.show()
+
+#%%
+
+# Reduced model
 #define X:
 features=["ring-type","stem-width", "cap-shape", "gill-attachment", "stem-color", "gill-color",  "stem-height"]
 X = df[["ring-type","stem-width", "cap-shape", "gill-attachment", "stem-color", "gill-color",  "stem-height"]]
 #define y:
 y = df["class"]
-
 
 #%% 
 # one_hot_data
@@ -491,8 +579,6 @@ dtree = dtree.fit(X_train, y_train)
 tree.plot_tree(dtree)
 plt.show()
 
-
-
 #%%
 
 # make prediction
@@ -506,7 +592,6 @@ y_pred
 score=accuracy_score(y_test, y_pred)
 score
 
-
 #%%
 #creating a confusion matrix
 confusion_matrix(y_test,y_pred)
@@ -519,8 +604,6 @@ tn, fp, fn, tp=confusion_matrix(y_test,y_pred).ravel()
 # run classification report
 conf_matrix= classification_report(y_test,y_pred)
 print('Classification report; \n', conf_matrix)
-
-
 
 print(confusion_matrix(y_test, dtree.predict(X_test)))
 #%%
@@ -574,19 +657,26 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import confusion_matrix
 
-
 #%%
 df=pd.read_csv(r'final.csv')
-df=df.drop(['Unnamed: 0'],axis=1)
+df=df.drop(['Unnamed: 0','has-ring'],axis=1)
+df.head()
+
+#%%
+df.shape
 
 #%%
 from sklearn.preprocessing import LabelEncoder
 labelencoder=LabelEncoder()
-for column in df.columns:
+columns=['cap-shape','cap-color','does-bruise-or-bleed','gill-attachment','gill-color','stem-color','ring-type','habitat','season','class']
+for column in columns:    
     df[column] = labelencoder.fit_transform(df[column])
 
 #%%
-features=["ring-type", "stem-width", "cap-shape", "gill-attachment", "stem-color", "gill-color", "stem-height","stem-width", "stem-height"]
+df.head()
+
+#%%
+features=["stem-width", "cap-shape", "gill-attachment", "stem-color", "gill-color", "stem-height","stem-width", "stem-height"]
 prediction=['class']
 
 #%%
@@ -594,11 +684,11 @@ X=df[features]
 y=df[prediction]
 
 #%%
-#Train Test Split
+# #### Train Test Split
 X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.30,random_state=123)
 
 #%%
-# Random Forest Classifier
+# ###  Random Forest Classifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 clf=RandomForestClassifier()
@@ -629,34 +719,32 @@ sns.heatmap(cf_mat/np.sum(cf_mat), annot=True,
             fmt='.2%', cmap='Blues')
 
 #%%
-conf_matrix = confusion_matrix(y_true=y_test, y_pred=y_pred)
-
+conf_matrix = confusion_matrix(y_test,y_pred)
 fig, ax = plt.subplots(figsize=(5, 5))
 ax.matshow(conf_matrix, cmap=plt.cm.Oranges, alpha=0.3)
 for i in range(conf_matrix.shape[0]):
     for j in range(conf_matrix.shape[1]):
         ax.text(x=j, y=i,s=conf_matrix[i, j], va='center', ha='center', size='xx-large')
- 
 plt.xlabel('Predictions', fontsize=18)
 plt.ylabel('Actuals', fontsize=18)
 plt.title('Confusion Matrix', fontsize=18)
 plt.show()
 
 #%%
-fpr, tpr, _ = metrics.roc_curve(y_test, y_pred)
-auc = metrics.roc_auc_score(y_test, y_pred)
-plt.plot(fpr,tpr,label="Gradient Boosting, AUC="+str(auc))
-
-plt.legend()
+# ### AUC - ROC Curve
+import numpy as np
+from sklearn import metrics
+fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred)
+plt.plot(fpr, tpr)
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate') 
 
 #%%
-# AUC - ROC Curve
-fpr, tpr, _ = metrics.roc_curve(y_test, y_pred)
-auc = round(metrics.roc_auc_score(y_test, y_pred), 4)
-plt.plot(fpr,tpr,label="Gradient Boosting, AUC="+str(auc))
+from sklearn .metrics import roc_auc_score
 
-#add legend
-plt.legend()
+auc = np.round(roc_auc_score(y_test, y_pred), 3)
+
+print("AUC SCORE",format(auc))
 
 #%% [markdown]
 # ### SVM
@@ -673,7 +761,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import confusion_matrix 
 from sklearn.metrics import classification_report
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, roc_auc_score
 from sklearn.metrics import RocCurveDisplay
 
 #%%
@@ -736,7 +824,8 @@ print(f'svc train score:  {model2.score(X_train_std,np.ravel(y_train_std))}') # 
 #%%
 # Hyperparameter grid search - Takes ~90 mins to run!!
 # Defining parameter range
-param_grid = {'C': [0.1, 1, 10], 
+
+'''param_grid = {'C': [0.1, 1, 10], 
               'gamma': [0.01, 1, 10],
               'kernel': ['rbf']} 
   
@@ -749,7 +838,7 @@ grid.fit(X_train_std, np.ravel(y_train_std))
 print(grid.best_params_) #{'C': 10, 'gamma': 1, 'kernel': 'rbf'}
   
 # print how our model looks after hyper-parameter tuning
-print(grid.best_estimator_) #SVC(C=10, gamma=1)
+print(grid.best_estimator_) #SVC(C=10, gamma=1)'''
 
 #%%
 # Best SVM Model
@@ -797,6 +886,7 @@ print('Precision: %.3f' % precision_score(y_test_std, y_pred)) # Precision: 0.99
 print('Recall: %.3f' % recall_score(y_test_std, y_pred)) # Recall: 1.000
 print('Accuracy: %.3f' % accuracy_score(y_test_std, y_pred)) # Accuracy: 0.999
 print('F1 Score: %.3f' % f1_score(y_test_std, y_pred)) # F1 Score: 0.999
+print('F1 Score:' % roc_auc_score(y_test_std, y_pred))
 
 #print(classification_report(y_test_std, bestsvm.predict(X_test_std)))
 """
@@ -817,8 +907,3 @@ plt.show()
 # SVC(AUC=1.00)
 
 #%%
-
-
-
-
-
