@@ -825,7 +825,7 @@ print(f'svc train score:  {model2.score(X_train_std,np.ravel(y_train_std))}') # 
 # Hyperparameter grid search - Takes ~90 mins to run!!
 # Defining parameter range
 
-'''param_grid = {'C': [0.1, 1, 10], 
+param_grid = {'C': [0.1, 1, 10], 
               'gamma': [0.01, 1, 10],
               'kernel': ['rbf']} 
   
@@ -838,7 +838,7 @@ grid.fit(X_train_std, np.ravel(y_train_std))
 print(grid.best_params_) #{'C': 10, 'gamma': 1, 'kernel': 'rbf'}
   
 # print how our model looks after hyper-parameter tuning
-print(grid.best_estimator_) #SVC(C=10, gamma=1)'''
+print(grid.best_estimator_) #SVC(C=10, gamma=1)
 
 #%%
 # Best SVM Model
@@ -848,13 +848,6 @@ bestsvm.fit(X_train_std, np.ravel(y_train_std))
 #%%
 # Train score
 print(f'svc train score:  {bestsvm.score(X_train_std,np.ravel(y_train_std))}') #0.9988303546364742
-
-# Mean cross validated score
-# scores = cross_val_score(bestsvm, X_train_std, np.ravel(y_train_std), cv=5)
-# print(f'svc cv scores: {scores}')
-# print(f'mean svc cv score: {scores.mean()}')
-#svc cv scores: [0.99836257 0.99812865 0.99871345 0.99719265 0.99801146]
-#mean svc cv score: 0.9980817591606419
 
 #%%
 # Model test set score
@@ -886,7 +879,7 @@ print('Precision: %.3f' % precision_score(y_test_std, y_pred)) # Precision: 0.99
 print('Recall: %.3f' % recall_score(y_test_std, y_pred)) # Recall: 1.000
 print('Accuracy: %.3f' % accuracy_score(y_test_std, y_pred)) # Accuracy: 0.999
 print('F1 Score: %.3f' % f1_score(y_test_std, y_pred)) # F1 Score: 0.999
-print('F1 Score:' % roc_auc_score(y_test_std, y_pred))
+print('ROC-AUC: %.3f' % roc_auc_score(y_test_std, y_pred)) # ROC-AUC: 1.000
 
 #print(classification_report(y_test_std, bestsvm.predict(X_test_std)))
 """
