@@ -13,6 +13,30 @@ __author__ = "Caroline Krall, Jerrick Gerald, Karina Martinez, Lijia Ren"
 #%%
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import LabelEncoder
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn import preprocessing
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, roc_auc_score, roc_curve
+from sklearn.metrics import RocCurveDisplay, ConfusionMatrixDisplay
+import statsmodels.api as sm
+import pylab as py
+from sklearn import tree
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelBinarizer
+get_ipython().run_line_magic('matplotlib', 'inline')
+plt.rcParams['figure.figsize'] = (10.0, 8.0)
+from scipy import stats
+from sklearn import metrics
+from scipy.stats import norm
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.compose import ColumnTransformer
+from sklearn import svm
+from sklearn.model_selection import cross_val_score, GridSearchCV
 
 #%%
 # Importing data
@@ -49,10 +73,6 @@ data.head()
 # %% [markdown]
 # ## EDA
 # ### Distribution Plots
-
-#%%
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 #%%
 df = pd.read_csv('final.csv')
@@ -288,7 +308,6 @@ table4
 #%%
 # Correlation Matrix
 df1 = df.copy(deep=True)
-from sklearn.preprocessing import LabelEncoder
 labelencoder=LabelEncoder()
 for column in df.columns:
     df1[column] = labelencoder.fit_transform(df1[column])
@@ -329,15 +348,11 @@ plt.show()
 # ### Logistic Regression
 
 #%%
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 
 df = pd.read_csv("final.csv")
 print(df.head())
 #%%
 #need to encode all strings to floats
-from sklearn import preprocessing
 
 le = preprocessing.LabelEncoder()
 for column_name in df.columns:
@@ -351,8 +366,6 @@ print(df.head())
 
 # %%
 # based on the model summary, I will drop gill attachment and stem color from the model
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
 yf = df[['class']]
 xf = df[['season' , 'habitat', 'does-bruise-or-bleed' ,'cap-color' ,'cap-diameter','ring-type', 'stem-width', 'cap-shape', 'gill-color', 'stem-height', 'stem-color', 'gill-attachment']]
 
@@ -362,7 +375,6 @@ fullLogit = LogisticRegression() #initiate logit model
 fullLogit.fit(xftrain, yftrain)
 
 #%%
-from sklearn.metrics import classification_report
 print(fullLogit.score(xftest, yftest))
 print(fullLogit.score(xftrain, yftrain))
 
@@ -371,13 +383,11 @@ print(classification_report(yftrue, yfpred))
 
 # %%
 # Confusion Matrix
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 conf = confusion_matrix(yftrue, yfpred)
 ConfusionMatrixDisplay.from_predictions(yftrue, yfpred)
 
 # %%
 # Model Evaluation metrics
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, roc_auc_score
 
 print(precision_score(yftest, yfpred))
 print(recall_score(yftest, yfpred))
@@ -386,7 +396,6 @@ print('F1 Score: %.3f' % f1_score(yftest, yfpred))
 print(roc_auc_score(yftest, yfpred))
 # %%
 # ROC Curve chart
-from sklearn.metrics import RocCurveDisplay
 RocCurveDisplay.from_predictions(yftest, yfpred)
 
 #%%
@@ -402,7 +411,6 @@ fullLogit.fit(xtrain, ytrain)
 
 #%%
 # model score and classification report
-from sklearn.metrics import classification_report
 print(fullLogit.score(xtest, ytest))
 print(fullLogit.score(xtrain, ytrain))
 
@@ -411,13 +419,11 @@ print(classification_report(ytrue, ypred))
 
 # %%
 # Confusion Matrix
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 conf = confusion_matrix(ytrue, ypred)
 ConfusionMatrixDisplay.from_predictions(ytrue, ypred)
 
 # %%
 # Model Evaluation metrics
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, roc_auc_score
 
 print(precision_score(ytest, ypred))
 print(recall_score(ytest, ypred))
@@ -426,7 +432,6 @@ print('F1 Score: %.3f' % f1_score(ytest, ypred))
 print(roc_auc_score(ytest, ypred))
 # %%
 # ROC Curve chart
-from sklearn.metrics import RocCurveDisplay
 RocCurveDisplay.from_predictions(ytest, ypred)
 
 
@@ -434,23 +439,8 @@ RocCurveDisplay.from_predictions(ytest, ypred)
 #%% [markdown]
 # ### Decision Tree
 
-#%%
-import numpy as np
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import statsmodels.api as sm
-import pylab as py
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import classification_report
-from sklearn.datasets import make_classification
-from sklearn import tree
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.preprocessing import StandardScaler
-#%%
 
+#%%
 # read data frame
 df = pd.read_csv('final.csv')
 df.info()
@@ -534,8 +524,6 @@ plt.title('Confusion Matrix', fontsize=18)
 plt.show()
 
 # %%
-import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score, roc_curve
 def plot_roc_curve(y_test, y_pred): 
     fpr, tpr, thresholds = roc_curve(y_test, y_pred)
     plt.plot(fpr, tpr)
@@ -544,7 +532,6 @@ def plot_roc_curve(y_test, y_pred):
 # %%
 #find AUC score
 
-from sklearn.metrics import RocCurveDisplay
 dtree_disp = RocCurveDisplay.from_estimator(dtree, X_test, y_test)
 plt.show()
 
@@ -624,8 +611,6 @@ plt.title('Confusion Matrix', fontsize=18)
 plt.show()
 
 # %%
-import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score, roc_curve
 def plot_roc_curve(y_test, y_pred): 
     fpr, tpr, thresholds = roc_curve(y_test, y_pred)
     plt.plot(fpr, tpr)
@@ -634,28 +619,11 @@ def plot_roc_curve(y_test, y_pred):
 # %%
 #find AUC score
 
-from sklearn.metrics import RocCurveDisplay
 dtree_disp = RocCurveDisplay.from_estimator(dtree, X_test, y_test)
 plt.show()
 
 #%% [markdown]
 # ### Random Forest
-
-#%%
-import numpy as np 
-import pandas as pd
-from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-get_ipython().run_line_magic('matplotlib', 'inline')
-plt.rcParams['figure.figsize'] = (10.0, 8.0)
-import seaborn as sns
-from scipy import stats
-from sklearn import metrics
-from scipy.stats import norm
-from sklearn.ensemble import ExtraTreesClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import confusion_matrix
 
 #%%
 df=pd.read_csv(r'final.csv')
@@ -666,7 +634,6 @@ df.head()
 df.shape
 
 #%%
-from sklearn.preprocessing import LabelEncoder
 labelencoder=LabelEncoder()
 columns=['cap-shape','cap-color','does-bruise-or-bleed','gill-attachment','gill-color','stem-color','ring-type','habitat','season','class']
 for column in columns:    
@@ -689,8 +656,6 @@ X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.30,random_state=1
 
 #%%
 # ###  Random Forest Classifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
 clf=RandomForestClassifier()
 clf.fit(X_train,y_train)
 
@@ -732,37 +697,18 @@ plt.show()
 
 #%%
 # ### AUC - ROC Curve
-import numpy as np
-from sklearn import metrics
 fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred)
 plt.plot(fpr, tpr)
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate') 
 
 #%%
-from sklearn .metrics import roc_auc_score
-
 auc = np.round(roc_auc_score(y_test, y_pred), 3)
 
 print("AUC SCORE",format(auc))
 
 #%% [markdown]
 # ### SVM
-
-#%%
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelBinarizer
-from sklearn import svm
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import confusion_matrix 
-from sklearn.metrics import classification_report
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, roc_auc_score
-from sklearn.metrics import RocCurveDisplay
 
 #%%
 # Read in the Mushroom Edibility dataset
@@ -879,7 +825,6 @@ print('Precision: %.3f' % precision_score(y_test_std, y_pred)) # Precision: 0.99
 print('Recall: %.3f' % recall_score(y_test_std, y_pred)) # Recall: 1.000
 print('Accuracy: %.3f' % accuracy_score(y_test_std, y_pred)) # Accuracy: 0.999
 print('F1 Score: %.3f' % f1_score(y_test_std, y_pred)) # F1 Score: 0.999
-print('ROC-AUC: %.3f' % roc_auc_score(y_test_std, y_pred)) # ROC-AUC: 1.000
 
 #print(classification_report(y_test_std, bestsvm.predict(X_test_std)))
 """
